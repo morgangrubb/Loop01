@@ -11,7 +11,7 @@ import android.widget.Button;
 import com.morgan.loop01.AppLog;
 
 public class Loop01 extends Activity {
-	private Channel recorderInstance = new Channel();
+	private Recorder recorderInstance = new Recorder();
 	private Thread recorderThread = new Thread(recorderInstance);;
 	
 	private boolean isRecording = false;

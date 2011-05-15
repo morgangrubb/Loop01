@@ -12,11 +12,11 @@ import android.media.MediaRecorder;
 
 import com.morgan.loop01.AppLog;
 
-public class Channel implements Runnable {
+public class Recorder implements Runnable {
 
 	private int frequency;
 	private int channelConfiguration;
-	private volatile boolean isPaused;
+//	private volatile boolean isPaused;
 	private File fileName;
 	private volatile boolean isRecording;
 	private final Object mutex = new Object();
@@ -27,12 +27,12 @@ public class Channel implements Runnable {
 	/**
 	*
 	*/
-	public Channel() {
+	public Recorder() {
 		super();
 		AppLog.log("Creating Channel()");
 		this.setFrequency(11025);
 		this.setChannelConfiguration(AudioFormat.CHANNEL_CONFIGURATION_MONO);
-		this.setPaused(false);
+//		this.setPaused(false);
 	}
 
 	public void run() {
@@ -41,31 +41,42 @@ public class Channel implements Runnable {
 		synchronized (mutex) {
 			while (!this.isRecording) {
 				try {
+					AppLog.log("waiting");
 					mutex.wait();
+					AppLog.log("waiting over");
 				} catch (InterruptedException e) {
 					throw new IllegalStateException("Wait() interrupted!", e);
 				}
 			}
 		}
 
+		record();
+	}
+
+	private void record() {
 		// Open output stream…
 		if (this.fileName == null) {
 			throw new IllegalStateException("fileName is null");
 		}
+		
 		BufferedOutputStream bufferedStreamInstance = null;
+
 		if (fileName.exists()) {
 			fileName.delete();
 		}
+
 		try {
 			fileName.createNewFile();
 		} catch (IOException e) {
 			throw new IllegalStateException("Cannot create file: " + fileName.toString());
 		}
+
 		try {
 			bufferedStreamInstance = new BufferedOutputStream(new FileOutputStream(this.fileName));
 		} catch (FileNotFoundException e) {
 			throw new IllegalStateException("Cannot Open File", e);
 		}
+
 		DataOutputStream dataOutputStreamInstance = new DataOutputStream(bufferedStreamInstance);
 
 		// We’re important…
@@ -79,18 +90,18 @@ public class Channel implements Runnable {
 		short[] tempBuffer = new short[bufferSize];
 		recordInstance.startRecording();
 		while (this.isRecording) {
-			// Are we paused?
-			synchronized (mutex) {
-				if (this.isPaused) {
-					AppLog.log("Paused");
-					try {
-						mutex.wait(250);
-					} catch (InterruptedException e) {
-						throw new IllegalStateException("Wait() interrupted!", e);
-					}
-					continue;
-				}
-			}
+//			// Are we paused?
+//			synchronized (mutex) {
+//				if (this.isPaused) {
+//					AppLog.log("Paused");
+//					try {
+//						mutex.wait(250);
+//					} catch (InterruptedException e) {
+//						throw new IllegalStateException("Wait() interrupted!", e);
+//					}
+//					continue;
+//				}
+//			}
 
 			bufferRead = recordInstance.read(tempBuffer, 0, bufferSize);
 			if (bufferRead == AudioRecord.ERROR_INVALID_OPERATION) {
@@ -109,7 +120,7 @@ public class Channel implements Runnable {
 			}
 
 		}
-AppLog.log("Stopping recording");
+		AppLog.log("Stopping recording");
 		// Close resources…
 		recordInstance.stop();
 		try {
@@ -118,7 +129,7 @@ AppLog.log("Stopping recording");
 			throw new IllegalStateException("Cannot close buffered writer.");
 		}
 	}
-
+	
 	public void setFileName(File fileName) {
 		this.fileName = fileName;
 	}
@@ -186,22 +197,22 @@ AppLog.log("Stopping recording");
 		return audioEncoding;
 	}
 
-	/**
-	* @param isPaused
-	*            the isPaused to set
-	*/
-	public void setPaused(boolean isPaused) {
-		synchronized (mutex) {
-			this.isPaused = isPaused;
-		}
-	}
-
-	/**
-	* @return the isPaused
-	*/
-	public boolean isPaused() {
-		synchronized (mutex) {
-			return isPaused;
-		}
-	}
+//	/**
+//	* @param isPaused
+//	*            the isPaused to set
+//	*/
+//	public void setPaused(boolean isPaused) {
+//		synchronized (mutex) {
+//			this.isPaused = isPaused;
+//		}
+//	}
+//
+//	/**
+//	* @return the isPaused
+//	*/
+//	public boolean isPaused() {
+//		synchronized (mutex) {
+//			return isPaused;
+//		}
+//	}
 }
