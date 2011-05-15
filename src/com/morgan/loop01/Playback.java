@@ -2,27 +2,24 @@ package com.morgan.loop01;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 
-class Playback {
-	public File fileName;
+class Playback extends Source {
 	
-	Playback(File file) {
-		fileName = file;
+	Playback() {
+		super();
 	}
 	
 	public void play() {
         // Get the length of the audio stored in the file (16 bit so 2 bytes per short)
         // and create a short array to store the recorded audio.
-        int musicLength = (int)(fileName.length()/2);
+        int musicLength = (int)(this.getFileName().length()/2);
         short[] music = new short[musicLength];
 
 
@@ -30,7 +27,7 @@ class Playback {
 		  // Create a DataInputStream to read the audio data back from the saved file.
 		  InputStream is;
 		try {
-			is = new FileInputStream(fileName);
+			is = new FileInputStream(this.getFileName());
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -65,9 +62,9 @@ class Playback {
 		  // Create a new AudioTrack object using the same parameters as the AudioRecord
 		  // object used to create the file.
 		  AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 
-		                                         11025, 
-		                                         AudioFormat.CHANNEL_CONFIGURATION_MONO,
-		                                         AudioFormat.ENCODING_PCM_16BIT, 
+		                                         this.getFrequency(), 
+		                                         this.getChannelConfiguration(),
+		                                         this.getAudioEncoding(), 
 		                                         musicLength, 
 		                                         AudioTrack.MODE_STREAM);
 		  // Start playback

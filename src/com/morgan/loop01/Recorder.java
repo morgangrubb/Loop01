@@ -2,27 +2,17 @@ package com.morgan.loop01;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 
 import com.morgan.loop01.AppLog;
 
-public class Recorder implements Runnable {
+public class Recorder extends Source {
 
-	private int frequency;
-	private int channelConfiguration;
-//	private volatile boolean isPaused;
-	private File fileName;
 	private volatile boolean isRecording;
-	private final Object mutex = new Object();
-
-	// Changing the sample resolution changes sample type. byte vs. short.
-	private static final int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
 
 	/**
 	*
@@ -30,8 +20,6 @@ public class Recorder implements Runnable {
 	public Recorder() {
 		super();
 		AppLog.log("Creating Channel()");
-		this.setFrequency(11025);
-		this.setChannelConfiguration(AudioFormat.CHANNEL_CONFIGURATION_MONO);
 //		this.setPaused(false);
 	}
 
@@ -130,14 +118,6 @@ public class Recorder implements Runnable {
 		}
 	}
 	
-	public void setFileName(File fileName) {
-		this.fileName = fileName;
-	}
-
-	public File getFileName() {
-		return fileName;
-	}
-
 	/**
 	* @param isRecording
 	*            the isRecording to set
@@ -160,42 +140,7 @@ public class Recorder implements Runnable {
 		}
 	}
 
-	/**
-	* @param frequency
-	*            the frequency to set
-	*/
-	public void setFrequency(int frequency) {
-		this.frequency = frequency;
-	}
 
-	/**
-	* @return the frequency
-	*/
-	public int getFrequency() {
-		return frequency;
-	}
-
-	/**
-	* @param channelConfiguration
-	*            the channelConfiguration to set
-	*/
-	public void setChannelConfiguration(int channelConfiguration) {
-		this.channelConfiguration = channelConfiguration;
-	}
-
-	/**
-	* @return the channelConfiguration
-	*/
-	public int getChannelConfiguration() {
-		return channelConfiguration;
-	}
-
-	/**
-	* @return the audioEncoding
-	*/
-	public int getAudioEncoding() {
-		return audioEncoding;
-	}
 
 //	/**
 //	* @param isPaused

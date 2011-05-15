@@ -44,7 +44,8 @@ public class Loop01 extends Activity {
 	}
 	
 	private void startPlaying() {
-		Playback player = new Playback(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/loop01.raw"));
+		Playback player = new Playback();
+		player.setFileName(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/loop01.raw"));
 		player.play();
 	}
 	
