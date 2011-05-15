@@ -10,4 +10,5 @@
     android:text="@string/hello"
     />
 <Button android:text="Button" android:id="@+id/btnStartStop" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+<Button android:text="Button" android:id="@+id/btnPlay" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
 </LinearLayout>

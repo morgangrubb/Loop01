@@ -23,11 +23,12 @@ public class Loop01 extends Activity {
 		setContentView(R.layout.main);
 		
 		((Button)findViewById(R.id.btnStartStop)).setOnClickListener(startStopButton);
+		((Button)findViewById(R.id.btnPlay)).setOnClickListener(playButton);
 	}
 	
 	private void startRecording() {
 //		recorderInstance = new Channel();
-		recorderInstance.setFileName(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/test.raw"));
+		recorderInstance.setFileName(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/loop01.raw"));
 		recorderThread.start();
 		recorderInstance.setRecording(true);
 
@@ -40,6 +41,11 @@ public class Loop01 extends Activity {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private void startPlaying() {
+		Playback player = new Playback(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/loop01.raw"));
+		player.play();
 	}
 	
 	private View.OnClickListener startStopButton = new View.OnClickListener() {
@@ -57,26 +63,13 @@ public class Loop01 extends Activity {
 			
 		}
 	};
+	
+	private View.OnClickListener playButton = new View.OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			startPlaying();
+			
+		}
+	};
 }
-
-//// Record 20 seconds of audio.
-////Channel recorderInstance = new Channel();
-////Thread th = new Thread(recorderInstance);
-//recorderInstance.setFileName(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/test.raw"));
-//th.start();
-//recorderInstance.setRecording(true);
-//
-//synchronized (this) {
-//	try {
-//		this.wait(20000);
-//	} catch (InterruptedException e) {
-//		e.printStackTrace();
-//	}
-//}
-//recorderInstance.setRecording(false);
-//try {
-//	th.join();
-//} catch (InterruptedException e) {
-//	e.printStackTrace();
-//}
-
