@@ -13,6 +13,7 @@ import com.morgan.loop01.AppLog;
 public class Recorder extends Source {
 
 	private volatile boolean isRecording;
+	private volatile boolean isPaused;
 
 	/**
 	*
@@ -20,7 +21,7 @@ public class Recorder extends Source {
 	public Recorder() {
 		super();
 		AppLog.log("Creating Channel()");
-//		this.setPaused(false);
+		this.setPaused(false);
 	}
 
 	public void run() {
@@ -72,24 +73,26 @@ public class Recorder extends Source {
 
 		// Allocate Recorder and Start Recording…
 		int bufferRead = 0;
-		int bufferSize = AudioRecord.getMinBufferSize(this.getFrequency(),
-		this.getChannelConfiguration(), this.getAudioEncoding());
+		int bufferSize = AudioRecord.getMinBufferSize(this.getFrequency(), this.getChannelConfiguration(), this.getAudioEncoding());
+		
 		AudioRecord recordInstance = new AudioRecord(MediaRecorder.AudioSource.MIC, this.getFrequency(), this.getChannelConfiguration(), this.getAudioEncoding(), bufferSize);
+
 		short[] tempBuffer = new short[bufferSize];
 		recordInstance.startRecording();
+
 		while (this.isRecording) {
-//			// Are we paused?
-//			synchronized (mutex) {
-//				if (this.isPaused) {
-//					AppLog.log("Paused");
-//					try {
-//						mutex.wait(250);
-//					} catch (InterruptedException e) {
-//						throw new IllegalStateException("Wait() interrupted!", e);
-//					}
-//					continue;
-//				}
-//			}
+			// Are we paused?
+			synchronized (mutex) {
+				if (this.isPaused) {
+					AppLog.log("Paused");
+					try {
+						mutex.wait(250);
+					} catch (InterruptedException e) {
+						throw new IllegalStateException("Wait() interrupted!", e);
+					}
+					continue;
+				}
+			}
 
 			bufferRead = recordInstance.read(tempBuffer, 0, bufferSize);
 			if (bufferRead == AudioRecord.ERROR_INVALID_OPERATION) {
@@ -142,22 +145,22 @@ public class Recorder extends Source {
 
 
 
-//	/**
-//	* @param isPaused
-//	*            the isPaused to set
-//	*/
-//	public void setPaused(boolean isPaused) {
-//		synchronized (mutex) {
-//			this.isPaused = isPaused;
-//		}
-//	}
-//
-//	/**
-//	* @return the isPaused
-//	*/
-//	public boolean isPaused() {
-//		synchronized (mutex) {
-//			return isPaused;
-//		}
-//	}
+	/**
+	* @param isPaused
+	*            the isPaused to set
+	*/
+	public void setPaused(boolean isPaused) {
+		synchronized (mutex) {
+			this.isPaused = isPaused;
+		}
+	}
+
+	/**
+	* @return the isPaused
+	*/
+	public boolean isPaused() {
+		synchronized (mutex) {
+			return isPaused;
+		}
+	}
 }

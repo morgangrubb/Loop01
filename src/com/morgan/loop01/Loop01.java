@@ -12,7 +12,10 @@ import com.morgan.loop01.AppLog;
 
 public class Loop01 extends Activity {
 	private Recorder recorderInstance = new Recorder();
-	private Thread recorderThread = new Thread(recorderInstance);;
+	private Thread recorderThread = new Thread(recorderInstance);
+	
+	private Playback playbackInstance = new Playback();
+	private Thread playbackThread = new Thread(playbackInstance);
 	
 	private boolean isRecording = false;
 	
@@ -44,9 +47,9 @@ public class Loop01 extends Activity {
 	}
 	
 	private void startPlaying() {
-		Playback player = new Playback();
-		player.setFileName(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/loop01.raw"));
-		player.play();
+		playbackInstance.setFileName(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/loop01.raw"));
+		playbackThread.start();
+		playbackInstance.setPlaying(true);
 	}
 	
 	private View.OnClickListener startStopButton = new View.OnClickListener() {

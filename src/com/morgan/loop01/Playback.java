@@ -5,73 +5,75 @@ import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-
 import android.media.AudioManager;
 import android.media.AudioTrack;
 
 class Playback extends Source {
-	
+
+	AudioTrack track;
+	private boolean isPlaying = false;
+
 	Playback() {
 		super();
+
+		int minSize = AudioTrack.getMinBufferSize(this.getFrequency(), this.getChannelConfiguration(), this.getAudioEncoding());        
+		track = new AudioTrack( AudioManager.STREAM_MUSIC, this.getFrequency(), this.getChannelConfiguration(), this.getAudioEncoding(), minSize, AudioTrack.MODE_STREAM);
+		track.play();        
 	}
 	
-	public void play() {
-        // Get the length of the audio stored in the file (16 bit so 2 bytes per short)
-        // and create a short array to store the recorded audio.
-        int musicLength = (int)(this.getFileName().length()/2);
-        short[] music = new short[musicLength];
+	@Override
+	public void run() {
 
+		// Open output stream…
+		if (this.getFileName() == null) {
+			throw new IllegalStateException("fileName is null");
+		}
+		
+		BufferedInputStream bufferedStreamInstance = null;
 
-//        try {
-		  // Create a DataInputStream to read the audio data back from the saved file.
-		  InputStream is;
+		if (!fileName.exists()) {
+			throw new IllegalStateException("File not found: " + this.getFileName().toString());
+		}
+
 		try {
-			is = new FileInputStream(this.getFileName());
+			bufferedStreamInstance = new BufferedInputStream(new FileInputStream(this.getFileName()));
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return;
+			throw new IllegalStateException("Cannot Open File", e);
 		}
-		  BufferedInputStream bis = new BufferedInputStream(is);
-		  DataInputStream dis = new DataInputStream(bis);
-		
-		  // Read the file into the music array.
-		  int i = 0;
-		  try {
-			while (dis.available() > 0) {
-			    music[i] = dis.readShort();
-			    i++;
-			  }
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		
-		  // Close the input streams.
-		  try {
-			dis.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return;
-		}     
-		
-		
-		  // Create a new AudioTrack object using the same parameters as the AudioRecord
-		  // object used to create the file.
-		  AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 
-		                                         this.getFrequency(), 
-		                                         this.getChannelConfiguration(),
-		                                         this.getAudioEncoding(), 
-		                                         musicLength, 
-		                                         AudioTrack.MODE_STREAM);
-		  // Start playback
-		  audioTrack.play();
-		
-		  // Write the music buffer to the AudioTrack object
-		  audioTrack.write(music, 0, musicLength);
-//        }
+
+		DataInputStream dataInputStreamInstance = new DataInputStream(bufferedStreamInstance);
+
+		// We’re important…
+		android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
+
+        while(true) {
+        	
+        	if (this.isPlaying) {
+        		short samples[] = new short[1024];
+        		
+        		for (int readIndex = 0; readIndex < 1024; readIndex++) {
+        			try {
+						if (dataInputStreamInstance.available() > 0) {
+							samples[readIndex] = dataInputStreamInstance.readShort();
+						}
+						else {
+							// Pad it with silence
+						}
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+        		}
+        		
+        		track.write(samples, 0, 1024);
+        	}
+
+           
+        }   
 	}
+	
+	public void setPlaying(boolean isPlaying) {
+		this.isPlaying = isPlaying;
+	}
+
 }
